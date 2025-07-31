@@ -1,0 +1,26 @@
+[
+  {
+    "id": "work",
+    "name": "Work",
+    "color": "from-blue-500 to-blue-600",
+    "icon": "Briefcase"
+  },
+  {
+    "id": "personal",
+    "name": "Personal",
+    "color": "from-green-500 to-green-600",
+    "icon": "User"
+  },
+  {
+    "id": "urgent",
+    "name": "Urgent",
+    "color": "from-red-500 to-red-600",
+    "icon": "AlertTriangle"
+  },
+  {
+    "id": "meeting",
+    "name": "Meeting",
+    "color": "from-purple-500 to-purple-600",
+    "icon": "Users"
+  }
+]
