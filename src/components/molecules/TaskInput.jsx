@@ -14,7 +14,7 @@ const TaskInput = ({ onAddTask, categories }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (title.trim()) {
-      onAddTask({
+onAddTask({
         title: title.trim(),
         category: selectedCategory,
         dueDate: dueDate || null
@@ -88,16 +88,16 @@ const TaskInput = ({ onAddTask, categories }) => {
                 <button
                   key={category.id}
                   type="button"
-                  onClick={() => setSelectedCategory(category.id)}
+onClick={() => setSelectedCategory(category.Name)}
                   className={cn(
                     "px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border",
-                    selectedCategory === category.id
-                      ? `bg-gradient-to-r ${category.color} text-white border-transparent shadow-sm`
+selectedCategory === category.Name
+                      ? `bg-gradient-to-r ${category.color_c} text-white border-transparent shadow-sm`
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
-                  <ApperIcon name={category.icon} size={12} className="mr-1" />
-                  {category.name}
+<ApperIcon name={category.icon_c} size={12} className="mr-1" />
+                  {category.Name}
                 </button>
               ))}
             </div>

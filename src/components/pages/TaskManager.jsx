@@ -1,23 +1,25 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import TaskInput from "@/components/molecules/TaskInput";
-import SearchBar from "@/components/molecules/SearchBar";
-import CategoryTabs from "@/components/molecules/CategoryTabs";
-import TaskList from "@/components/organisms/TaskList";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
+import { AuthContext } from "@/App";
 import ApperIcon from "@/components/ApperIcon";
-import { taskService } from "@/services/api/taskService";
+import CategoryTabs from "@/components/molecules/CategoryTabs";
+import SearchBar from "@/components/molecules/SearchBar";
+import TaskInput from "@/components/molecules/TaskInput";
+import TaskList from "@/components/organisms/TaskList";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
 import { categoryService } from "@/services/api/categoryService";
+import { taskService } from "@/services/api/taskService";
 
-const TaskManager = () => {
+function TaskManager() {
   const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const { logout } = useContext(AuthContext);
 
   const loadData = async () => {
     try {
@@ -60,8 +62,7 @@ const TaskManager = () => {
       if (!task) return;
 
       const updatedTask = await taskService.update(taskId, {
-        ...task,
-        completed: !task.completed
+        completed_c: !task.completed_c
       });
 
       setTasks(prevTasks =>
@@ -69,7 +70,7 @@ const TaskManager = () => {
       );
 
       toast.success(
-        updatedTask.completed ? "Task completed!" : "Task marked as incomplete"
+        updatedTask.completed_c ? "Task completed!" : "Task marked as incomplete"
       );
     } catch (err) {
       toast.error("Failed to update task. Please try again.");
@@ -90,26 +91,53 @@ const TaskManager = () => {
 
   // Calculate task counts for each category
   const taskCounts = useMemo(() => {
-    const counts = { all: tasks.filter(t => !t.completed).length };
+    const counts = { all: tasks.filter(t => !t.completed_c).length };
     
     categories.forEach(category => {
-      counts[category.id] = tasks.filter(t => 
-        t.category === category.id && !t.completed
+      counts[category.Name] = tasks.filter(t => 
+        t.category_c?.Id === category.Id && !t.completed_c
       ).length;
     });
     
     return counts;
   }, [tasks, categories]);
 
-  if (loading) {
+  const filteredTasks = useMemo(() => {
+    let filtered = tasks;
+
+    // Filter by category
+    if (activeCategory !== "all") {
+      const selectedCategory = categories.find(cat => cat.Name === activeCategory);
+      if (selectedCategory) {
+        filtered = filtered.filter(task => task.category_c?.Id === selectedCategory.Id);
+      }
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(task => 
+        task.title_c?.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort by completion status and creation order
+    return filtered.sort((a, b) => {
+      if (a.completed_c !== b.completed_c) {
+        return a.completed_c ? 1 : -1; // Completed tasks go to bottom
+      }
+      return (b.order_c || 0) - (a.order_c || 0); // Most recent first
+    });
+  }, [tasks, categories, activeCategory, searchQuery]);
+
+if (loading) {
     return <Loading text="Loading your tasks..." />;
   }
 
   if (error) {
     return <Error message={error} onRetry={loadData} />;
   }
-
-  return (
+return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <motion.header 
@@ -132,13 +160,22 @@ const TaskManager = () => {
               </div>
             </div>
             
-            <div className="text-right">
-              <div className="text-sm text-slate-600">
-                {taskCounts.all} active tasks
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm text-slate-600">
+                  {taskCounts.all} active tasks
+                </div>
+                <div className="text-xs text-slate-500">
+                  {tasks.filter(t => t.completed_c).length} completed
+                </div>
               </div>
-              <div className="text-xs text-slate-500">
-                {tasks.filter(t => t.completed).length} completed
-              </div>
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <ApperIcon name="LogOut" size={16} />
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -169,7 +206,7 @@ const TaskManager = () => {
         />
 
         <TaskList
-          tasks={tasks}
+          tasks={filteredTasks}
           categories={categories}
           activeCategory={activeCategory}
           searchQuery={searchQuery}
@@ -179,6 +216,6 @@ const TaskManager = () => {
       </main>
     </div>
   );
-};
+}
 
 export default TaskManager;

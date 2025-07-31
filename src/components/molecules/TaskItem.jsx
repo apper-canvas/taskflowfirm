@@ -45,8 +45,8 @@ const TaskItem = ({ task, category, onToggleComplete, onDelete }) => {
           whileTap={{ scale: 0.9 }}
           className="mt-0.5"
         >
-          <Checkbox
-            checked={task.completed}
+<Checkbox
+            checked={task.completed_c}
             onChange={() => onToggleComplete(task.Id)}
           />
         </motion.div>
@@ -54,12 +54,12 @@ const TaskItem = ({ task, category, onToggleComplete, onDelete }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3">
             <h3 
-              className={cn(
+className={cn(
                 "font-medium text-slate-900 transition-all duration-200",
-                task.completed && "line-through text-slate-500"
+                task.completed_c && "line-through text-slate-500"
               )}
             >
-              {task.title}
+{task.title_c}
             </h3>
             
             <motion.button
@@ -78,13 +78,13 @@ const TaskItem = ({ task, category, onToggleComplete, onDelete }) => {
               {category.name}
             </Badge>
             
-            {task.dueDate && (
+{task.dueDate_c && (
               <div className={cn(
                 "flex items-center gap-1 text-xs font-medium",
-                getDueDateColor(task.dueDate)
+                getDueDateColor(task.dueDate_c)
               )}>
                 <ApperIcon name="Calendar" size={12} />
-                {formatDueDate(task.dueDate)}
+                {formatDueDate(task.dueDate_c)}
               </div>
             )}
           </div>

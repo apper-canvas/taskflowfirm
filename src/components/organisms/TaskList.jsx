@@ -15,29 +15,33 @@ const TaskList = ({
     let filtered = tasks;
 
     // Filter by category
-    if (activeCategory !== "all") {
-      filtered = filtered.filter(task => task.category === activeCategory);
+if (activeCategory !== "all") {
+      const selectedCategory = categories.find(cat => cat.Name === activeCategory);
+      if (selectedCategory) {
+        filtered = filtered.filter(task => task.category_c?.Id === selectedCategory.Id);
+      }
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(task => 
-        task.title.toLowerCase().includes(query)
+filtered = filtered.filter(task => 
+        task.title_c?.toLowerCase().includes(query)
       );
     }
 
     // Sort by completion status and creation order
-    return filtered.sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1; // Completed tasks go to bottom
+return filtered.sort((a, b) => {
+      if (a.completed_c !== b.completed_c) {
+        return a.completed_c ? 1 : -1; // Completed tasks go to bottom
       }
-      return b.order - a.order; // Most recent first
+      return (b.order_c || 0) - (a.order_c || 0); // Most recent first
     });
   }, [tasks, activeCategory, searchQuery]);
 
-  const getCategoryById = (categoryId) => {
-    return categories.find(cat => cat.id === categoryId) || categories[0];
+const getCategoryById = (categoryLookup) => {
+    if (!categoryLookup?.Id) return categories[0];
+    return categories.find(cat => cat.Id === categoryLookup.Id) || categories[0];
   };
 
   if (filteredTasks.length === 0) {
@@ -76,9 +80,9 @@ const TaskList = ({
       <AnimatePresence mode="popLayout">
         {filteredTasks.map((task) => (
           <TaskItem
-            key={task.Id}
-            task={task}
-            category={getCategoryById(task.category)}
+task={task}
+            category={getCategoryById(task.category_c)}
+            onToggleComplete={onToggleComplete}
             onToggleComplete={onToggleComplete}
             onDelete={onDeleteTask}
           />
